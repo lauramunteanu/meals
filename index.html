@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meal plan</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥣</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F1F4EE;
+  --surface: #FFFFFF;
+  --ink: #1E2A22;
+  --muted: #5E6B61;
+  --line: #D3DBD0;
+  --accent: #5B2A4E;
+  --accent-soft: #EDE1EA;
+  --saffron: #C98A0C;
+  --saffron-soft: #F7ECD3;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141A16;
+    --surface: #1D2520;
+    --ink: #E6ECE4;
+    --muted: #9AA79D;
+    --line: #2F3A33;
+    --accent: #D6A3C9;
+    --accent-soft: #3A2736;
+    --saffron: #F0B43A;
+    --saffron-soft: #3A3020;
+    color-scheme: dark;
+  }
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1rem/1.5 "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 40rem; margin: 0 auto; padding: 1.25rem 1.25rem 7rem; }
+h1, h2, h3, .serif { font-family: "Young Serif", Georgia, "Times New Roman", serif; font-weight: 400; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Day header */
+.plan-title { color: var(--muted); font-size: .9rem; margin: 0; }
+.day-head { margin: .25rem 0 1rem; }
+.day-head h1 { font-size: clamp(2.6rem, 11vw, 3.6rem); line-height: 1; margin: 0; letter-spacing: -.01em; }
+.day-head .date { color: var(--accent); }
+.day-head .sub { color: var(--muted); margin: .5rem 0 0; }
+
+/* Day strip */
+.strip { display: flex; gap: .4rem; overflow-x: auto; padding: .25rem 0 .75rem; margin: 0 -1.25rem; padding-left: 1.25rem; padding-right: 1.25rem; scrollbar-width: none; }
+.strip::-webkit-scrollbar { display: none; }
+.strip button {
+  flex: 0 0 auto; width: 3.1rem; padding: .45rem 0 .5rem; border-radius: 1.6rem;
+  border: 1px solid var(--line); background: var(--surface); text-align: center;
+}
+.strip .wd { display: block; font-size: .75rem; color: var(--muted); }
+.strip .dn { display: block; font-family: "Young Serif", Georgia, serif; font-size: 1.25rem; line-height: 1.2; }
+.strip button[aria-current="date"] .wd { color: var(--saffron); font-weight: 600; }
+.strip button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.strip button[aria-pressed="true"] .wd { color: var(--bg); }
+
+/* Meals */
+.note {
+  background: var(--saffron-soft); border-left: 3px solid var(--saffron);
+  padding: .6rem .8rem; border-radius: 0 .5rem .5rem 0; margin: .5rem 0 1rem; font-size: .95rem;
+}
+.meals { list-style: none; margin: 0; padding: 0; }
+.meals li + li { border-top: 1px solid var(--line); }
+.meal {
+  display: grid; grid-template-columns: 1fr auto; gap: .2rem 1rem; align-items: baseline;
+  width: 100%; text-align: left; background: none; border: 0; padding: 1rem 0;
+}
+.meal .kind { grid-column: 1 / -1; font-size: .85rem; color: var(--muted); }
+.meal .name { font-family: "Young Serif", Georgia, serif; font-size: 1.35rem; line-height: 1.25; }
+.meal .nums { color: var(--muted); font-size: .9rem; white-space: nowrap; }
+.meal .tag { grid-column: 1 / -1; font-size: .85rem; }
+.tag.cook { color: var(--accent); font-weight: 600; }
+.tag.left { color: var(--muted); }
+.meal.off { opacity: .55; }
+.total { display: flex; justify-content: space-between; border-top: 2px solid var(--ink); padding-top: .75rem; margin-top: .25rem; font-weight: 600; }
+
+/* Lists */
+.section-h { font-size: 1.6rem; margin: 1.5rem 0 .5rem; }
+.rlist { list-style: none; padding: 0; margin: 0; }
+.rlist li + li { border-top: 1px solid var(--line); }
+.rlist button { width: 100%; text-align: left; background: none; border: 0; padding: .85rem 0; display: flex; justify-content: space-between; gap: 1rem; }
+.rlist .serif { font-size: 1.15rem; }
+.rlist .nums { color: var(--muted); font-size: .9rem; white-space: nowrap; }
+
+.shop { list-style: none; padding: 0; margin: 0; }
+.shop li { border-top: 1px solid var(--line); }
+.shop label { display: flex; gap: .8rem; padding: .7rem 0; align-items: flex-start; cursor: pointer; }
+.shop input { width: 1.25rem; height: 1.25rem; margin-top: .15rem; accent-color: var(--accent); flex: 0 0 auto; }
+.shop .qty { display: block; color: var(--muted); font-size: .9rem; }
+.shop input:checked + span .item { text-decoration: line-through; color: var(--muted); }
+.reset { margin-top: 1.25rem; background: none; border: 1px solid var(--line); border-radius: 2rem; padding: .5rem 1rem; color: var(--muted); }
+
+.notes dt { font-family: "Young Serif", Georgia, serif; font-size: 1.15rem; margin-top: 1.1rem; }
+.notes dd { margin: .25rem 0 0; color: var(--ink); }
+
+/* Recipe sheet */
+dialog {
+  border: 0; padding: 0; width: 100%; max-width: 40rem; max-height: 88vh;
+  margin: auto auto 0; border-radius: 1.25rem 1.25rem 0 0;
+  background: var(--surface); color: var(--ink);
+}
+dialog::backdrop { background: rgba(20, 26, 22, .45); }
+dialog[open] { animation: up .22s ease-out; }
+@keyframes up { from { transform: translateY(2rem); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } }
+.sheet { padding: 1.25rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); overflow-y: auto; max-height: 88vh; }
+.sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.sheet h2 { font-size: 1.8rem; line-height: 1.15; margin: 0; }
+.close { background: var(--bg); border: 0; border-radius: 50%; width: 2.25rem; height: 2.25rem; flex: 0 0 auto; font-size: 1.2rem; }
+.macro { display: flex; gap: 1.5rem; margin: .75rem 0 1rem; }
+.macro div { font-size: .85rem; color: var(--muted); }
+.macro strong { display: block; font-family: "Young Serif", Georgia, serif; font-weight: 400; font-size: 1.5rem; color: var(--accent); }
+.sheet h3 { font-size: 1.15rem; margin: 1.25rem 0 .4rem; }
+.sheet ul, .sheet ol { padding-left: 1.2rem; margin: 0; }
+.sheet li { margin: .3rem 0; }
+.tip { background: var(--accent-soft); border-radius: .6rem; padding: .7rem .85rem; margin-top: 1.25rem; font-size: .95rem; }
+
+/* Tab bar */
+nav.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+nav.tabs .in { max-width: 40rem; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+nav.tabs button { background: none; border: 0; padding: .85rem 0; font-weight: 500; color: var(--muted); }
+nav.tabs button[aria-selected="true"] { color: var(--accent); font-weight: 600; box-shadow: inset 0 3px 0 var(--accent); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section id="view-day" aria-label="Day">
+    <p class="plan-title" id="plan-title"></p>
+    <div class="day-head">
+      <h1><span id="day-name"></span> <span class="date" id="day-num"></span></h1>
+      <p class="sub" id="day-sub"></p>
+    </div>
+    <div class="strip" id="strip" role="group" aria-label="Choose a day"></div>
+    <div id="day-note"></div>
+    <ul class="meals" id="meals"></ul>
+    <div class="total" id="total"></div>
+  </section>
+
+  <section id="view-recipes" aria-label="Recipes" hidden>
+    <h2 class="section-h">Breakfasts</h2>
+    <ul class="rlist" id="r-breakfast"></ul>
+    <h2 class="section-h">Lunches & dinners</h2>
+    <ul class="rlist" id="r-main"></ul>
+    <h2 class="section-h">Snacks</h2>
+    <ul class="rlist" id="r-snack"></ul>
+  </section>
+
+  <section id="view-shop" aria-label="Shopping" hidden>
+    <div id="shop"></div>
+    <button class="reset" id="reset">Clear all ticks</button>
+  </section>
+
+  <section id="view-notes" aria-label="Notes" hidden>
+    <h2 class="section-h" id="target"></h2>
+    <dl class="notes" id="notes"></dl>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="in" role="tablist">
+    <button role="tab" data-view="day" aria-selected="true">Day</button>
+    <button role="tab" data-view="recipes" aria-selected="false">Recipes</button>
+    <button role="tab" data-view="shop" aria-selected="false">Shopping</button>
+    <button role="tab" data-view="notes" aria-selected="false">Notes</button>
+  </div>
+</nav>
+
+<dialog id="sheet" aria-labelledby="sheet-title">
+  <div class="sheet">
+    <div class="sheet-top">
+      <h2 id="sheet-title"></h2>
+      <button class="close" id="close" aria-label="Close recipe">✕</button>
+    </div>
+    <div class="macro" id="sheet-macro"></div>
+    <div id="sheet-body"></div>
+  </div>
+</dialog>
+
+<script src="plan.js"></script>
+<script>
+(function () {
+  const P = window.MEALPLAN;
+  if (!P) { document.body.textContent = "plan.js didn't load. Check it sits next to index.html."; return; }
+  const R = P.recipes;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  const parse = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const key = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const todayKey = key(new Date());
+  const days = P.days;
+
+  let idx = days.findIndex((d) => d.date === todayKey);
+  if (idx < 0) idx = todayKey < days[0].date ? 0 : days.length - 1;
+
+  $("plan-title").textContent = P.title;
+
+  // Day strip
+  const strip = $("strip");
+  days.forEach((d, i) => {
+    const dt = parse(d.date);
+    const b = document.createElement("button");
+    b.innerHTML = '<span class="wd">' + dt.toLocaleDateString("en-GB", { weekday: "short" }) + '</span><span class="dn">' + dt.getDate() + "</span>";
+    b.setAttribute("aria-label", dt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }));
+    if (d.date === todayKey) b.setAttribute("aria-current", "date");
+    b.addEventListener("click", () => { idx = i; renderDay(); });
+    strip.appendChild(b);
+  });
+
+  function slot(kind, entry) {
+    if (!entry) return null;
+    const e = typeof entry === "string" ? { r: entry } : entry;
+    const rec = R[e.r];
+    if (!rec) return null;
+    return { kind, rec, id: e.r, cook: e.cook, leftover: e.leftover, note: e.note };
+  }
+
+  function renderDay() {
+    const d = days[idx];
+    const dt = parse(d.date);
+    $("day-name").textContent = dt.toLocaleDateString("en-GB", { weekday: "long" });
+    $("day-num").textContent = dt.getDate();
+    $("day-sub").textContent = d.date === todayKey ? "Today" : dt.toLocaleDateString("en-GB", { month: "long" });
+
+    [...strip.children].forEach((b, i) => b.setAttribute("aria-pressed", i === idx ? "true" : "false"));
+    strip.children[idx].scrollIntoView({ block: "nearest", inline: "center" });
+
+    $("day-note").innerHTML = d.note ? '<p class="note">' + esc(d.note) + "</p>" : "";
+
+    const slots = [
+      slot("Breakfast", d.breakfast),
+      slot("Lunch", d.lunch),
+      slot("Dinner", d.dinner),
+      d.snack ? slot("Snack", "snack") : null
+    ].filter(Boolean);
+
+    const ul = $("meals");
+    ul.innerHTML = "";
+    let kcal = 0, prot = 0;
+    slots.forEach((s) => {
+      kcal += s.rec.kcal; prot += s.rec.protein;
+      let tag = "";
+      if (s.cook) tag = '<span class="tag cook">Cook tonight · makes 6 portions</span>';
+      else if (s.leftover) tag = '<span class="tag left">Leftovers' + (s.note ? ": " + esc(s.note) : "") + "</span>";
+      else if (s.note) tag = '<span class="tag left">' + esc(s.note) + "</span>";
+      const li = document.createElement("li");
+      li.innerHTML = '<button class="meal"><span class="kind">' + s.kind + '</span><span class="name">' + esc(s.rec.name) +
+        '</span><span class="nums">' + s.rec.kcal + " kcal · " + s.rec.protein + " g</span>" + tag + "</button>";
+      li.querySelector("button").addEventListener("click", () => openRecipe(s.id));
+      ul.appendChild(li);
+    });
+    $("total").innerHTML = "<span>Day, per person</span><span>" + kcal + " kcal · " + prot + " g protein</span>";
+  }
+
+  // Recipe sheet
+  const sheet = $("sheet");
+  function openRecipe(id) {
+    const r = R[id];
+    $("sheet-title").textContent = r.name;
+    $("sheet-macro").innerHTML = "<div><strong>" + r.kcal + "</strong>kcal each</div><div><strong>" + r.protein + " g</strong>protein each</div>";
+    let html = "<h3>Ingredients" + (r.meal === "snack" ? "" : " for two") + "</h3><ul>" + r.ingredients.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>";
+    html += "<h3>Method</h3><ol>" + r.steps.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ol>";
+    if (r.tip) html += '<p class="tip">' + esc(r.tip) + "</p>";
+    $("sheet-body").innerHTML = html;
+    sheet.showModal();
+    sheet.querySelector(".sheet").scrollTop = 0;
+  }
+  $("close").addEventListener("click", () => sheet.close());
+  sheet.addEventListener("click", (e) => { if (e.target === sheet) sheet.close(); });
+
+  // Recipes list
+  Object.entries(R).forEach(([id, r]) => {
+    const target = $("r-" + r.meal);
+    if (!target) return;
+    const li = document.createElement("li");
+    li.innerHTML = '<button><span class="serif">' + esc(r.name) + '</span><span class="nums">' + r.kcal + " kcal · " + r.protein + " g</span></button>";
+    li.querySelector("button").addEventListener("click", () => openRecipe(id));
+    target.appendChild(li);
+  });
+
+  // Shopping with ticks saved in this browser
+  const store = {
+    get(k) { try { return localStorage.getItem(k) === "1"; } catch (e) { return false; } },
+    set(k, v) { try { v ? localStorage.setItem(k, "1") : localStorage.removeItem(k); } catch (e) {} }
+  };
+  const shop = $("shop");
+  P.shopping.forEach((g, gi) => {
+    const h = document.createElement("h2");
+    h.className = "section-h";
+    h.textContent = g.title;
+    shop.appendChild(h);
+    const ul = document.createElement("ul");
+    ul.className = "shop";
+    g.items.forEach((it, ii) => {
+      const k = "meals:" + P.id + ":" + gi + ":" + ii;
+      const li = document.createElement("li");
+      li.innerHTML = '<label><input type="checkbox"' + (store.get(k) ? " checked" : "") + '><span><span class="item">' + esc(it.name) +
+        "</span>" + (it.qty ? '<span class="qty">' + esc(it.qty) + "</span>" : "") + "</span></label>";
+      li.querySelector("input").addEventListener("change", (e) => store.set(k, e.target.checked));
+      ul.appendChild(li);
+    });
+    shop.appendChild(ul);
+  });
+  $("reset").addEventListener("click", () => {
+    shop.querySelectorAll("input").forEach((inp, n) => { inp.checked = false; });
+    try { Object.keys(localStorage).filter((k) => k.startsWith("meals:" + P.id + ":")).forEach((k) => localStorage.removeItem(k)); } catch (e) {}
+  });
+
+  // Notes
+  $("target").textContent = P.target;
+  $("notes").innerHTML = P.notes.map((n) => "<dt>" + esc(n.title) + "</dt><dd>" + esc(n.text) + "</dd>").join("");
+
+  // Tabs
+  const tabs = document.querySelectorAll("[role=tab]");
+  tabs.forEach((t) => t.addEventListener("click", () => {
+    tabs.forEach((x) => x.setAttribute("aria-selected", x === t ? "true" : "false"));
+    ["day", "recipes", "shop", "notes"].forEach((v) => { $("view-" + v).hidden = v !== t.dataset.view; });
+    window.scrollTo(0, 0);
+  }));
+
+  renderDay();
+})();
+</script>
+</body>
+</html>

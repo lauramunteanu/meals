@@ -235,7 +235,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); font-weight: 600; 
     const e = typeof entry === "string" ? { r: entry } : entry;
     const rec = R[e.r];
     if (!rec) return null;
-    return { kind, rec, id: e.r, cook: e.cook, leftover: e.leftover, note: e.note };
+    return { kind, rec, id: e.r, cook: e.cook, portions: e.portions || window.MEALPLAN.portions || 4, leftover: e.leftover, note: e.note };
   }
 
   function renderDay() {
@@ -263,7 +263,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); font-weight: 600; 
     slots.forEach((s) => {
       kcal += s.rec.kcal; prot += s.rec.protein;
       let tag = "";
-      if (s.cook) tag = '<span class="tag cook">Cook tonight · makes 6 portions</span>';
+      if (s.cook) tag = '<span class="tag cook">Cook tonight · makes ' + s.portions + ' portions</span>';
       else if (s.leftover) tag = '<span class="tag left">Leftovers' + (s.note ? ": " + esc(s.note) : "") + "</span>";
       else if (s.note) tag = '<span class="tag left">' + esc(s.note) + "</span>";
       const li = document.createElement("li");

@@ -3,6 +3,7 @@
 window.MEALPLAN = {
   id: "2026-10-18",
   title: "17 – 30 October",
+  portions: 4,
   target: "About 1700 kcal and 90–100 g protein a day, each",
 
   notes: [
@@ -209,7 +210,7 @@ window.MEALPLAN = {
   },
 
   days: [
-    { date: "2026-10-17", breakfast: "eggs", lunch: { r: "shake_plate" }, dinner: { r: "shawarma", cook: true, note: "Made 6 portions this time" }, snack: false, note: "Logged as eaten." },
+    { date: "2026-10-17", breakfast: "eggs", lunch: { r: "shake_plate" }, dinner: { r: "shawarma", cook: true, portions: 6 }, snack: false, note: "Logged as eaten." },
     { date: "2026-10-18", breakfast: "shake", lunch: { r: "soup" }, dinner: { r: "dal", cook: true }, snack: false, note: "Wine night: no snack." },
     { date: "2026-10-19", breakfast: "skyr", lunch: { r: "dal", leftover: true }, dinner: { r: "shawarma", leftover: true }, snack: true },
     { date: "2026-10-20", breakfast: "chia", lunch: { r: "shawarma", leftover: true, note: "Last of the batch" }, dinner: { r: "tofu", cook: true }, snack: true, note: "Make Thursday's chia tonight." },

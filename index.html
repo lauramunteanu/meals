@@ -131,6 +131,13 @@ dialog[open] { animation: up .22s ease-out; }
 .sheet h3 { font-size: 1.15rem; margin: 1.25rem 0 .4rem; }
 .sheet ul, .sheet ol { padding-left: 1.2rem; margin: 0; }
 .sheet li { margin: .3rem 0; }
+.prep { background: var(--accent-soft); border-radius: .75rem; padding: .85rem 1rem; margin-top: 1.5rem; }
+.prep h2 { font-size: 1.25rem; margin: 0 0 .25rem; }
+.prep ul { list-style: none; margin: 0; padding: 0; }
+.prep li + li { border-top: 1px solid var(--line); }
+.prep button { width: 100%; text-align: left; background: none; border: 0; padding: .55rem 0; }
+.prep .kind { display: block; font-size: .85rem; color: var(--muted); }
+.prep .serif { display: block; font-size: 1.1rem; }
 .tip { background: var(--accent-soft); border-radius: .6rem; padding: .7rem .85rem; margin-top: 1.25rem; font-size: .95rem; }
 
 /* Tab bar */
@@ -157,6 +164,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); font-weight: 600; 
     <div id="day-note"></div>
     <ul class="meals" id="meals"></ul>
     <div class="total" id="total"></div>
+    <div id="prep"></div>
   </section>
 
   <section id="view-recipes" aria-label="Recipes" hidden>
@@ -273,6 +281,23 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); font-weight: 600; 
       ul.appendChild(li);
     });
     $("total").innerHTML = "<span>Day, per person</span><span>" + kcal + " kcal · " + prot + " g protein</span>";
+
+    // Anything tomorrow's meals need doing tonight (recipes with a prep field; leftovers are already made)
+    const next = days[idx + 1];
+    const preps = next ? [slot("Breakfast", next.breakfast), slot("Lunch", next.lunch), slot("Dinner", next.dinner)]
+      .filter((s) => s && s.rec.prep && !s.leftover) : [];
+    const box = $("prep");
+    box.innerHTML = "";
+    if (preps.length) {
+      box.className = "prep";
+      box.innerHTML = "<h2>Tonight, for tomorrow</h2><ul></ul>";
+      preps.forEach((s) => {
+        const li = document.createElement("li");
+        li.innerHTML = '<button><span class="kind">' + s.kind + " · " + esc(s.rec.name) + '</span><span class="serif">' + esc(s.rec.prep) + "</span></button>";
+        li.querySelector("button").addEventListener("click", () => openRecipe(s.id));
+        box.querySelector("ul").appendChild(li);
+      });
+    } else box.className = "";
   }
 
   // Recipe sheet
@@ -282,6 +307,7 @@ nav.tabs button[aria-selected="true"] { color: var(--accent); font-weight: 600; 
     $("sheet-title").textContent = r.name;
     $("sheet-macro").innerHTML = "<div><strong>" + r.kcal + "</strong>kcal each</div><div><strong>" + r.protein + " g</strong>protein each</div>";
     let html = "<h3>Ingredients" + (r.meal === "snack" ? "" : " for two") + "</h3><ul>" + r.ingredients.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul>";
+    if (r.prep) html += "<h3>The night before</h3><p>" + esc(r.prep) + "</p>";
     html += "<h3>Method</h3><ol>" + r.steps.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ol>";
     if (r.tip) html += '<p class="tip">' + esc(r.tip) + "</p>";
     $("sheet-body").innerHTML = html;

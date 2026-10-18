@@ -15,4 +15,9 @@ A small phone-friendly page showing each day's meals, recipes for two, shopping 
 
 ## Update for the next fortnight
 
+Things `plan.js` can set besides days, recipes, shopping and notes:
+
+- `portions` at the top sets how many portions a cook night makes (default 4). A single dinner can override it, for example `{ r: "shawarma", cook: true, portions: 6 }`.
+- `prep` on a recipe is what to do the night before, for example soaking chia. The day before that meal, the Day view shows it under "Tonight, for tomorrow".
+
 Ask Claude for a new `plan.js`, then replace the old file in the repo. Shopping ticks are saved in your browser and reset automatically when the plan's `id` changes.
